@@ -1,4 +1,21 @@
 
+/* Zero-page Globals (commonly used vars) */
+#pragma bss-name(push, "ZEROPAGE")
+/* Often used vars */
+u8 i;               /* Iterator */
+u8 j;               /* Iterator */
+
+/* PPU write data */
+uptr ppu_addr;      /* PPU destination addr */
+const u8* ppu_data; /* Pointer to data to copy over */
+u8 ppu_data_size;   /* Size in bytes of data */
+#pragma bss-name(pop)
+
+/* OAM sprites */
+#pragma bss-name(push, "OAM")
+sprite_t player;
+sprite_t stick;
+
 const u8 PALETTE[] = {
 	COLOR_BLACK, /* Background color */
 
@@ -12,7 +29,7 @@ const u8 PALETTE[] = {
 
 	COLOR_BLACK, /* Background color (mirror) */
 
-	COLOR_DGRAY, COLOR_WHITE, COLOR_LGRAY, /* Sprite palette 0 */
+	COLOR_RED, COLOR_YELLOW, COLOR_BLUE, /* Sprite palette 0 */
 	0,
 	0, 0, 0,
 	0,
@@ -20,6 +37,7 @@ const u8 PALETTE[] = {
 	0,
 	0, 0, 0,
 };
+#pragma bss-name(pop)
 
 /* Sprite tile indices */
 #define BLANK_TILE    0x00
@@ -32,3 +50,4 @@ const u8 PALETTE[] = {
 #define BORDER_L      0x03
 #define BORDER_R      0x13
 #define SPRITE_PLAYER 0x10
+#define SPRITE_STICK  0x05

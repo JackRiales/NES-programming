@@ -10,24 +10,9 @@
 /* Headers */
 #define TV_NTSC 1
 #include <stddef.h>
+#include <stdlib.h>
 #include "nesdev.h"
 #include "reset.h"
-
-/* Zero-page Globals (commonly used vars) */
-#pragma bss-name(push, "ZEROPAGE")
-u8 i;           /* Iterator */
-u8 j;           /* Iterator */
-u8 attr_offset; /* Offset into our attributes */
-
-/* PPU write data */
-uptr ppu_addr;      /* PPU destination addr */
-const u8* ppu_data; /* Pointer to data to copy over */
-u8 ppu_data_size;   /* Size in bytes of data */
-#pragma bss-name(pop)
-
-#pragma bss-name(push, "OAM")
-sprite_t player;
-#pragma bss-name(pop)
 
 /* Data inclusions */
 #include "gamedata.c"
@@ -38,7 +23,7 @@ void ppu_scroll_reset (void)
 	PPU_SCROLL = 0x00;
 }
 
-void ppu_write()
+void ppu_write (void)
 {
 	PPU_ADDRESS = (u8) (ppu_addr >> 8);
 	PPU_ADDRESS = (u8) (ppu_addr);
@@ -46,17 +31,23 @@ void ppu_write()
 		PPU_DATA = ppu_data[i];
 }
 
-void ppu_enable()
+void ppu_disable (void)
+{
+	PPU_CTRL = 0;
+	PPU_MASK = 0;
+}
+
+void ppu_enable (void)
 {
 	PPU_CTRL = PPUCTRL_NAMETABLE_0 | /* Use Nametable 0 */
 	           PPUCTRL_BPATTERN_0  | /* Let the bg use pattern table 0 */
 	           PPUCTRL_NMI_ON      ; /* Enable NMIs */
 
-	PPU_MASK = PPUMASK_COLOR    | /* Show colors */
-	           PPUMASK_BSHOW    | /* Show background as well */
-			   PPUMASK_L8_BSHOW | /* Show bg tiles in leftmost 8px */
-			   PPUMASK_SSHOW    | /* Show sprites */
-			   PPUMASK_L8_SSHOW ; /* Show sprites in leftmost 8px */
+	PPU_MASK = PPUMASK_COLOR    |    /* Show colors */
+	           PPUMASK_BSHOW    |    /* Show background as well */
+			   PPUMASK_L8_BSHOW |    /* Show bg tiles in leftmost 8px */
+			   PPUMASK_SSHOW    |    /* Show sprites */
+			   PPUMASK_L8_SSHOW ;    /* Show sprites in leftmost 8px */
 }
 
 void draw_background (void)
@@ -92,6 +83,8 @@ void draw_background (void)
 
 void main (void)
 {
+	ppu_disable();
+
 	/* Shoot the PPU our palettes */
 	ppu_addr = PPU_PALETTE;
 	ppu_data = PALETTE;
@@ -106,6 +99,11 @@ void main (void)
 	player.y = (MAX_Y / 2) - (SPRITE_WIDTH / 2);
 	player.tile_index = SPRITE_PLAYER;
 
+	/* And our stick sprite */
+	stick.x = rand() + 32;
+	stick.y = rand() + 32;
+	stick.tile_index = SPRITE_STICK;
+
 	/* Enable rendering */
 	ppu_scroll_reset();
 	ppu_enable();
@@ -116,6 +114,7 @@ void main (void)
 		WaitFrame();
 		ppu_scroll_reset();
 
+		/* Player movement */
 		if ((InputPort1 & BUTTON_UP) &&
 			player.y > MIN_Y + SPRITE_HEIGHT)
 		{
@@ -123,7 +122,7 @@ void main (void)
 		}
 
 		if ((InputPort1 & BUTTON_DOWN) &&
-			player.y < MAX_Y + (SPRITE_HEIGHT * 2))
+			player.y < MAX_Y - (SPRITE_HEIGHT * 2))
 		{
 			++player.y;
 		}
@@ -135,9 +134,19 @@ void main (void)
 		}
 
 		if ((InputPort1 & BUTTON_RIGHT) &&
-			player.x < MAX_X + (SPRITE_WIDTH * 2))
+			player.x < MAX_X - (SPRITE_WIDTH * 2))
 		{
 			++player.x;
+		}
+
+		/* Stick collision */
+		if (player.x <= stick.x + SPRITE_WIDTH &&
+			player.x + SPRITE_WIDTH >= stick.x &&
+			player.y <= stick.x + SPRITE_HEIGHT &&
+			player.y + SPRITE_HEIGHT >= stick.y)
+		{
+			stick.x = rand();
+			stick.y = rand();
 		}
 	}
 }

@@ -35,6 +35,10 @@ typedef uintptr_t uptr;
 #define PPU_ADDRESS *((u8*)0x2006)
 #define PPU_DATA    *((u8*)0x2007)
 
+// OAM Addresses
+#define OAM_ADDRESS *((u8*)0x2003)
+#define OAM_DMA     *((u8*)0x4014)
+
 // PPU_CTRL flags
 // see http://wiki.nesdev.com/w/index.php/PPU_registers#Controller_.28.242000.29_.3E_write
 #define PPUCTRL_NAMETABLE_0 0x00 // use nametable 0
@@ -84,7 +88,6 @@ typedef uintptr_t uptr;
 #define PPU_NAMETABLE_1     0x2400 // nametable 1
 #define PPU_NAMETABLE_2     0x2800 // nametable 2
 #define PPU_NAMETABLE_3     0x2c00 // nametable 3
-#define PPU_NAMETABLE_OFFSET 0
 #define PPU_ATTRIB_TABLE_0  0x23c0 // attribute table for nametable 0
 #define PPU_ATTRIB_TABLE_1  0x27c0 // attribute table for nametable 1
 #define PPU_ATTRIB_TABLE_2  0x2bc0 // attribute table for nametable 2
@@ -123,14 +126,26 @@ typedef uintptr_t uptr;
 // PPU resolution in 8x8 pixel cells
 // see http://wiki.nesdev.com/w/index.php/PPU_nametables
 #define NUM_COLS 32
-#define NUM_ROWS 30
+#define MIN_X 0
+#define MAX_X 256
 
-// PPU framerate
+// NTSC and PAL specific configs
 #ifdef TV_NTSC
+  #define MIN_Y 8
+  #define MAX_Y 231
+  #define NUM_ROWS 28
+  #define FIRST_ROW 1
+  #define LAST_ROW 27
   #define FRAMES_PER_SEC 60
 #else // TV_PAL
+  #define MIN_Y 0
+  #define MAX_Y 239
+  #define NUM_ROWS 30
+  #define FIRST_ROW 0
+  #define LAST_ROW 29
   #define FRAMES_PER_SEC 50
 #endif
+#define PPU_NAMETABLE_OFFSET (NUM_COLS * FIRST_ROW)
 
 // standard controller buttons
 // see http://wiki.nesdev.com/w/index.php/Standard_controller
@@ -143,13 +158,9 @@ typedef uintptr_t uptr;
 #define BUTTON_B      0x40
 #define BUTTON_A      0x80
 
-// Sprite bounds
+// Sprite mode is 8x8
 #define SPRITE_WIDTH  8
 #define SPRITE_HEIGHT 8
-#define MIN_X         0
-#define MIN_Y         0
-#define MAX_X         256
-#define MAX_Y         256
 
 // OAM sprite data
 // see http://wiki.nesdev.com/w/index.php/PPU_OAM
