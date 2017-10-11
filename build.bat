@@ -1,18 +1,19 @@
 @echo off
 
+REM config
 set name="hello"
 set cc65=c:\nes\cc65
-set libdir=lib
-set incdir=include
+set include=include
+set lib=lib
 set ccflags=-Oi
+set platform=nes
+set config=nes.cfg
 
+REM set path
 set path=%path%;%cc65%\bin
 
-cc65 -Oi -I include -t nes %name%.c --add-source
-ca65 %name%.s
-ca65 reset.s
-ld65 -C nes.cfg -o bin/hello.nes reset.o %name%.o lib/nes.lib
-.\fceux\fceux.exe bin/hello.nes
-
-del *.o
-del %name%.s
+cc65 %ccflags% -I %include% -t %platform% prg/%name%.c --add-source
+ca65 prg/%name%.s
+ca65 lib\neslib\crt0.s 
+ld65 -C config\%config% -o bin/%name%.nes lib\neslib\crt0.o prg/%name%.o lib\nes.lib
+.\tools\fceux\fceux.exe bin/%name%.nes

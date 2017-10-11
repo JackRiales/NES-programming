@@ -9,10 +9,18 @@ u8 j;               /* Iterator */
 uptr ppu_addr;      /* PPU destination addr */
 const u8* ppu_data; /* Pointer to data to copy over */
 u8 ppu_data_size;   /* Size in bytes of data */
+
+/* Input state */
+u8 pad;
+
+/* Game data */
+rect_t player_rect; /* Player collision box */
+rect_t stick_rect;  /* Stick collision box */
+u8 colliding;       /* Is the player and stick colliding */
+points_t points;
 #pragma bss-name(pop)
 
-/* OAM sprites */
-#pragma bss-name(push, "OAM")
+/* Sprite data */
 sprite_t player;
 sprite_t stick;
 
@@ -37,7 +45,6 @@ const u8 PALETTE[] = {
 	0,
 	0, 0, 0,
 };
-#pragma bss-name(pop)
 
 /* Sprite tile indices */
 #define BLANK_TILE    0x00

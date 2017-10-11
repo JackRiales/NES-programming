@@ -172,4 +172,19 @@ typedef struct sprite
 	u8 x;
 } sprite_t;
 
+typedef struct rect
+{
+  u8 x;
+  u8 y;
+  u8 w;
+  u8 h;
+  u8 max_x;
+  u8 max_y;
+} rect_t;
+
+typedef struct points
+{
+  u8 digits[3];
+} points_t;
+
 #endif

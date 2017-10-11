@@ -256,4 +256,4 @@ sounds_data:
 
 .segment "CHARS"
 
-	.incbin "tileset.chr"
+	.incbin "chr/sprites.chr"
