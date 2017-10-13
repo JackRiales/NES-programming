@@ -12,11 +12,16 @@
 #include <stdint.h>
 
 // Funner to type typenames
+typedef int16_t   s16;
+typedef uint16_t  u16;
 typedef int8_t    s8;
 typedef uint8_t   u8;
 typedef uintptr_t uptr;
 
 // 8-bit integer limits
+#define U16_MAX   65535
+#define S16_MAX   32767
+#define S16_MIN  -32767
 #define UCHAR_MAX 255
 #define U8_MAX    255
 #define CHAR_MAX  128
@@ -162,8 +167,17 @@ typedef uintptr_t uptr;
 #define SPRITE_WIDTH  8
 #define SPRITE_HEIGHT 8
 
+/* Ascii lettering in the chr */
+#define ASCII_POSITION 0x0
+#define ASCII_NUMBERSPOSITION 0x10
+#define ASCII_OFFSET   ASCII_POSITION-0x20
+
+// NESLIB Meta-sprite format
+#define METASPR_EOB 128
+
 // OAM sprite data
 // see http://wiki.nesdev.com/w/index.php/PPU_OAM
+// This one only supports a single, simple, 8x8 sprite
 typedef struct sprite
 {
 	u8 y;
@@ -172,19 +186,58 @@ typedef struct sprite
 	u8 x;
 } sprite_t;
 
+// OAM meta sprite
+// Buffer should follow neslib metasprite format
+typedef struct metasprite
+{
+  u8 x;
+  u8 y;
+  u8 *index_buffer;
+} metasprite_t;
+
+// Generic rectangle definition
 typedef struct rect
 {
   u8 x;
   u8 y;
   u8 w;
   u8 h;
-  u8 max_x;
-  u8 max_y;
+  u8 max_x; /* x + width */
+  u8 max_y; /* y + height */
 } rect_t;
 
-typedef struct points
+// Used to represent numbers larger than 8-bit
+// using only 8-bit numbers as digits
+typedef struct digits
 {
-  u8 digits[3];
-} points_t;
+  u8 *segments;
+  u8  num_segments;
+} digits_t;
+
+// Draws a simple sprite and offsets the oam pointer
+void __fastcall__ spr (const sprite_t *sprite, u8 *oam_ptr);
+
+// Draws a metasprite and offsets the oam pointer
+void __fastcall__ metaspr (const metasprite_t *metasprite, u8 *oam_ptr);
+
+// Returns 1 if the two rectangles intersect, 0 if not
+u8 __fastcall__ collides (const rect_t *first, const rect_t *second);
+
+// Initializes a digits struct with a given number of digits
+// Makes use of MALLOC
+void __fastcall__ digit_init (digits_t *digits, u8 num);
+
+// Updates a digit representation to ensure all digits
+// are <= 9
+void __fastcall__ digit_update(digits_t *digits);
+
+// Increments the digit "number" by a certain amount
+// and then updates it to keep it consistent
+void __fastcall__ digit_increment(digits_t *digits, s8 amt);
+
+// Prints some text to the given nametable address
+// Make use of NTADR_*() macro to specify position
+// Ensure that ascii offset is defined
+void __fastcall__ nt_print(u16 adr, const u8 * str);
 
 #endif
