@@ -195,6 +195,20 @@ typedef struct metasprite
   u8 *index_buffer;
 } metasprite_t;
 
+// Function pointer types
+typedef void (*function)(void);
+typedef void (*draw_function)(u8*);
+
+// Defines a state that can be initialized, updated, and switched
+typedef struct gamestate
+{
+  function      nt_init;
+  function      init;
+  function      update;
+  draw_function draw;
+  struct gamestate *next;
+} gamestate_t;
+
 // Generic rectangle definition
 typedef struct rect
 {
@@ -220,8 +234,14 @@ void __fastcall__ spr (const sprite_t *sprite, u8 *oam_ptr);
 // Draws a metasprite and offsets the oam pointer
 void __fastcall__ metaspr (const metasprite_t *metasprite, u8 *oam_ptr);
 
-// Returns 1 if the two rectangles intersect, 0 if not
-u8 __fastcall__ collides (const rect_t *first, const rect_t *second);
+// Moves a rectangle while maintaining max_x and max_y values
+void __fastcall__ move_rect (rect_t *rect, u8 x, u8 y);
+
+// Determines if a point (x, y) is inside the given rect
+u8 __fastcall__ point_in_rect (const rect_t *rect, u8 x, u8 y);
+
+// Rectangle intersection function for two rects
+u8 __fastcall__ rect_collides (const rect_t *first, const rect_t *second);
 
 // Initializes a digits struct with a given number of digits
 // Makes use of MALLOC

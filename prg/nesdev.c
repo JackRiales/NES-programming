@@ -1,4 +1,5 @@
 
+#include "neslib.h"
 #include "nesdev.h"
 #include <stdlib.h>
 
@@ -23,14 +24,27 @@ void __fastcall__ metaspr (const metasprite_t *metasprite, u8 *oam_ptr)
 }
 
 /*
-    Collision system
+    Rectangle functions
 */
+void __fastcall__ move_rect (rect_t *rect, u8 x, u8 y)
+{
+  rect->x = x;
+  rect->y = y;
+  rect->max_x = rect->x + rect->w;
+  rect->max_y = rect->y + rect->h;
+}
+
+u8 __fastcall__ point_in_rect (const rect_t *rect, u8 x, u8 y)
+{
+  return (x > rect->x && y > rect->y && x < rect->max_x && y < rect->max_y);
+}
+
 u8 __fastcall__ rect_collides(const rect_t *first, const rect_t *second)
 {
-    return (first->max_x > second->x && 
-            second->max_x > first->x &&
-            first->max_y > second->y && 
-            second->max_y > first->y);
+    return (first->x < second->max_x && 
+            first->max_x > second->x &&
+            first->y < second->max_y && 
+            first->max_y > second->y);
 }
 
 /*
@@ -38,20 +52,43 @@ u8 __fastcall__ rect_collides(const rect_t *first, const rect_t *second)
 */
 void __fastcall__ digit_init (digits_t *digits, u8 num)
 {
+  static u8 i;
+  
   digits->num_segments = num;
   digits->segments = (u8*) malloc (num * sizeof(u8));
+  for (i = 0; i < digits->num_segments; ++i)
+  {
+    digits->segments[i] = 0;
+  }
 }
 
 void __fastcall__ digit_update(digits_t *digits)
 {
-  static u8 digit_itr = 0;
-  for (digit_itr = 0; digit_itr < digits->num_segments - 2; ++digit_itr)
+  /*static u8 i = 0;
+  
+  // If a digit is over 9, ground it and set the next one up
+  for (i = 0; i < digits->num_segments - 2; ++i)
   {
-    if (digits->segments[digit_itr] > 9)
+    if (digits->segments[i] > 9)
     {
-      digits->segments[digit_itr]    = 0;
-      digits->segments[digit_itr+1] += 1;
+      digits->segments[i]    = 0;
+      digits->segments[i+1] += 1;
     }
+  }
+
+  // Cap last digit at 9
+  if (digits->segments[digits->num_segments - 1] > 9)
+    digits->segments[digits->num_segments - 1] = 9;*/
+  if (digits->segments[0] > 9)
+  {
+    digits->segments[0]  = 0;
+    digits->segments[1] += 1;
+  }
+  
+  if (digits->segments[1] > 9)
+  {
+    digits->segments[1]  = 0;
+    digits->segments[2] += 1;
   }
 }
 

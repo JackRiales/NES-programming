@@ -5,7 +5,9 @@
             "includePath": [
                 "/usr/include",
                 "/usr/local/include",
-                "${workspaceRoot}"
+                "${workspaceRoot}",
+                "${workspaceRoot}/include",
+                "${workspaceRoot}/nam"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
