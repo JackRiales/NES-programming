@@ -224,8 +224,7 @@ typedef struct rect
 // using only 8-bit numbers as digits
 typedef struct digits
 {
-  u8 *segments;
-  u8  num_segments;
+  u8 segments[8];
 } digits_t;
 
 // Draws a simple sprite and offsets the oam pointer

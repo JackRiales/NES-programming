@@ -9,6 +9,7 @@
 
 /* Headers */
 #define TV_NTSC 1
+#define ENABLE_INTRO 1
 #include <stddef.h>
 #include <stdlib.h>
 #include "neslib.h"
@@ -45,6 +46,14 @@ void shake (void)
 		scroll_y *= -1;
 }
 
+void update_point_text (void)
+{
+	for (i = 0; i < 8; i++)
+	{
+		TEXTBUF_Points[3+i] = points.segments[7-i]+ASCII_NUMBERSPOSITION;
+	}
+}
+
 /* Initialize nametables here (pre-ppu state) */
 void nt_init (void)
 {
@@ -53,8 +62,8 @@ void nt_init (void)
 	vram_unrle(test);
 
 	// Create the points digit array and set it as updatable
-	digit_init(&points, 3);
 	memcpy(TEXTBUF_Points, TEXTBUFINIT_Points, sizeof(TEXTBUFINIT_Points));
+	update_point_text();
 	set_vram_update(TEXTBUF_Points);
 }
 
@@ -99,6 +108,7 @@ void init (void)
 /* Update game state */
 void update (void)
 {
+#if ENABLE_INTRO
 	/* Fading in the screen */
 	if (bg_bright < 4)
 	{
@@ -110,6 +120,10 @@ void update (void)
 	}
 	else
 		music_pause(0);
+#else
+	bg_bright  = 4;
+	spr_bright = 4;
+#endif
 
 	/* Get input and move player */
 	pad1 = pad_poll(0); // Get gamepad state
@@ -127,11 +141,11 @@ void update (void)
 	
 	// Touch event
 	touching = rect_collides(&player_col, &stick_col);
-	if (touching             || 
-		stick.x < 8          ||
-		stick.y < 8          ||
-		stick.x > MAX_X - 16 || 
-		stick.y > MAX_Y - 16)
+	if (touching                     || 
+		stick.x < world_bounds.x     ||
+		stick.y < world_bounds.y     ||
+		stick.x > world_bounds.max_x || 
+		stick.y > world_bounds.max_y)
 	{
 		// Move stick somewhere else
 		stick.x = rand8();
@@ -145,9 +159,7 @@ void update (void)
 	if (touching)
 	{
 		digit_increment(&points, 1);
-		TEXTBUF_Points[TEXTBUF_Index(1)] = points.segments[2]+ASCII_NUMBERSPOSITION;
-		TEXTBUF_Points[TEXTBUF_Index(2)] = points.segments[1]+ASCII_NUMBERSPOSITION;
-		TEXTBUF_Points[TEXTBUF_Index(3)] = points.segments[0]+ASCII_NUMBERSPOSITION;
+		update_point_text();
 
 		// Juice!
 		flash_time = 5;

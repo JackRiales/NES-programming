@@ -50,24 +50,12 @@ u8 __fastcall__ rect_collides(const rect_t *first, const rect_t *second)
 /*
     Digit system
 */
-void __fastcall__ digit_init (digits_t *digits, u8 num)
-{
-  static u8 i;
-  
-  digits->num_segments = num;
-  digits->segments = (u8*) malloc (num * sizeof(u8));
-  for (i = 0; i < digits->num_segments; ++i)
-  {
-    digits->segments[i] = 0;
-  }
-}
-
 void __fastcall__ digit_update(digits_t *digits)
 {
-  /*static u8 i = 0;
+  static u8 i = 0;
   
   // If a digit is over 9, ground it and set the next one up
-  for (i = 0; i < digits->num_segments - 2; ++i)
+  for (i = 0; i < 6; ++i)
   {
     if (digits->segments[i] > 9)
     {
@@ -77,19 +65,8 @@ void __fastcall__ digit_update(digits_t *digits)
   }
 
   // Cap last digit at 9
-  if (digits->segments[digits->num_segments - 1] > 9)
-    digits->segments[digits->num_segments - 1] = 9;*/
-  if (digits->segments[0] > 9)
-  {
-    digits->segments[0]  = 0;
-    digits->segments[1] += 1;
-  }
-  
-  if (digits->segments[1] > 9)
-  {
-    digits->segments[1]  = 0;
-    digits->segments[2] += 1;
-  }
+  if (digits->segments[7] > 9)
+    digits->segments[7] = 9;
 }
 
 void __fastcall__ digit_increment(digits_t *digits, s8 amt)
